@@ -1,4 +1,4 @@
-# Garbi
+# Smart Garbage Segregation - GARBI
 Today, huge amounts of waste/garbage are generated every
 day, which has further increased pressure on landfills and caused eco- logical
 concerns worldwide. Recycling seems to be the best long-term a solution
