@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html  lang="en" dir="ltr">
+<head>
+    <meta charset="utf-8">
+
+    <title>Flask App </title>
+
+    <!-- Bootstraps Java Scipts Links -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+    <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.co m/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
+
+
+
+    <!-- JQuery links  -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+
+
+    <!--High CHART LIVE  -->
+    <script src="http://code.highcharts.com/highcharts.js"></script>
+    <script src="http://code.highcharts.com/highcharts-more.js"></script>
+    <script src="http://code.highcharts.com/modules/exporting.js"></script>
+
+    <!--Gauge  -->
+    <script type="text/javascript" src="http://pubnub.github.io/eon/lib/eon.js"></script>
+
+
+</head>
+
+<body>
+<body style="background-color:#90ee90">
+
+    <div class="jumbotron">
+        <center><h1><strong><p style="font-family:verdana;"><p style="font-size:300%;"> GARBI - Smart Garbage Segregator Plant </h1></center></strong></p></p>
+    </div>
+    <br>
+
+    <div class="container-fluid">
+
+        <div class="row">
+
+            <div class="col-8 jumbotron p-2 mx-1">
+                <h1 class="sensor1"> Bio Bin Status : </h1>
+                <br>
+                <h1 class="sensor2"> Temperature : </h1>
+                <br>
+                <h1 class="sensor3"> Humidity : </h1>
+                <br>
+                <h1 class="sensor4"> Air Quality : </h1>                
+            </div>
+            <br>
+
+            <div class="col-8 jumbotron p-2 mx-1">
+                <h1 class="sensor5"> Non-Bio Bin Status : </h1>
+                <br>
+                <h1 class="actuator1"> Fan1 : </h1>
+                <br>
+                <h1 class="actuator2"> Fan2 : </h1>
+                <br>
+                <h1 class="actuator3"> Safety Alert System : </h1>
+            </div>
+            <br>
+
+            <div class="col-8 jumbotron p-2 mx-1">
+                <h1><p style="color:black;"> <b><i> NOTE: </h1></p></b></i> 
+                <h1><p style="color:green;"> <b><i> EMERGENCY ALERT! 0 ALERT! 0 = "ALL GOOD"</h1></p></b></i>
+                <h1><p style="color:red;"> <b><i> EMERGENCY ALERT! 1 ALERT! 1 = "EMERGENCY FIRE ALERT!" </h1></p></b></i>
+                <h1><p style="color:rgb(218, 135, 10);"> <b><i> EMERGENCY ALERT! 2 ALERT! 2 = "EMERGENCY GAS ALERT!" </h1></p></b></i>
+            </div>
+            <br>
+
+        </div>
+    </div>
+
+    <style>
+
+        .jumbotron{
+            widows: 175px;
+            height: 300px;
+            justify-content: center;
+        }
+
+        .row{
+            justify-content: center;
+        }
+
+
+    </style>
+
+    <div class="container-fluid">
+        <!-- Example row of columns -->
+        <div class="row">
+            <div class="container-fluid" id="data-biobinstatus">
+
+            </div>
+        </div>
+    </div>
+<br>
+<br>
+<br>
+
+    <div class="container-fluid">
+        <!-- Example row of columns -->
+        <div class="row">
+            <div class="container-fluid" id="data-temperature">
+
+            </div>
+        </div>
+    </div>
+<br>
+<br>
+<br>
+
+    <div class="container-fluid">
+        <!-- Example row of columns -->
+        <div class="row">
+            <div class="container-fluid" id="data-humidity">
+
+            </div>
+        </div>
+    </div>
+<br>
+<br>
+<br>
+
+    <div class="container-fluid">
+        <!-- Example row of columns -->
+        <div class="row">
+            <div class="container-fluid" id="data-airquality">
+
+            </div>
+        </div>
+    </div>
+<br>
+<br>
+<br>
+
+    <div class="container-fluid">
+        <!-- Example row of columns -->
+        <div class="row">
+            <div class="container-fluid" id="data-nonbiobinstatus">
+
+            </div>
+        </div>
+    </div>
+<br>
+<br>
+<br>
+
+    <div class="container-fluid">
+        <!-- Example row of columns -->
+        <div class="row">
+            <div class="container-fluid" id="data-alert">
+
+            </div>
+        </div>
+    </div>
+       
+    <script>
+        var chartTemperatue;
+        var chartHumidity;
+        var chartAirquality;
+
+        function requestData()
+        {
+            // Ajax call to get the Data from Flask
+            var requests = $.get('/data');
+
+            var tm = requests.done(function (result)
+            {
+                // Temperature
+                var seriesTemperature = chartTemperatue.series[0],
+                    shiftTemperature = seriesTemperature.data.length > 20;
+
+                // Humidity
+                var seriesHumidity = chartHumidity.series[0],
+                    shiftHumidity = seriesHumidity.data.length > 20;
+
+                // Light
+                var seriesAirquality = chartAirquality.series[0],
+                    shiftAirquality = seriesAirquality.data.length > 20;
+
+                // Add the Point
+                // Time Temperature\
+                var data1 = [];
+                data1.push(result[0]);
+                data1.push(result[1]);
+
+
+                // Add the Point
+                // Time Humidity
+                var data2 = [];
+                data2.push(result[0]);
+                data2.push(result[2]);
+
+                // Add the Point
+                // Time Airquality
+                var data3 = [];
+                data3.push(result[0]);
+                data3.push(result[3]);
+                
+                // Add the Point
+                // Time biobinstatus
+                var data4 = [];
+                data4.push(result[0]);
+                data4.push(result[4]);
+
+                // Add the Point
+                // Time nonbiobinstatus
+                var data5 = [];
+                data5.push(result[0]);
+                data5.push(result[5]);
+
+                chartTemperatue.series[0].addPoint(data1, true, shiftTemperature);
+                chartHumidity.series[0].addPoint(data2, true, shiftHumidity);
+                chartAirquality.series[0].addPoint(data3, true, shiftAirquality);
+
+                $(".sensor1").text("");
+                if(Math.round(data5[1]) >= 80){
+                    $(".sensor1").text("Bio Bin Status : " + Math.round(data5[1]) + " %").css('backgroundColor', 'red');
+                }
+                if(Math.round(data5[1]) < 80){
+                    $(".sensor1").text("Bio Bin Status : " + Math.round(data5[1]) + " %").css('backgroundColor','white');    
+                }
+                $(".sensor1").text("Bio Bin Status : " + Math.round(data5[1]) + " %");
+                    
+                $(".sensor2").text("");
+                $(".sensor2").text("Temperature : " +  Math.round(data1[1]) + " C");
+
+                $(".sensor3").text("");
+                $(".sensor3").text("Humidity : " +  Math.round(data2[1]) );
+
+                $(".sensor4").text("");
+                $(".sensor4").text("Air Quality : " +  Math.round(data3[1]) + " AQI");
+
+                $(".sensor5").text("");
+                if(Math.round(data4[1]) >= 80){
+                    $(".sensor5").text("Non-bio Bin Status : " +  Math.round(data4[1]) + "%" ).css('backgroundColor', 'red');
+                }
+                if(Math.round(data4[1]) < 80){
+                    $(".sensor5").text("Non-bio Bin Status : " +  Math.round(data4[1]) + "%" ).css('backgroundColor','white');
+                }
+                $(".sensor5").text("Non-bio Bin Status : " +  Math.round(data4[1]) + "%" );
+
+                $(".actuator1").text("");
+                $(".actuator1").text("Fan1 : " +  result[6] );
+
+                $(".actuator2").text("");
+                $(".actuator2").text("Fan2 : " +  result[7] );
+
+                $(".actuator3").text("");
+                $(".actuator3").text("Safety Alert System: EMERGENCY ALERT!" +"  "+ result[8] + " ALERT!" +"  "+  result[8] );
+
+                // call it again after one second
+                setTimeout(requestData, 5000);
+
+            });
+        }
+
+        $(document).ready(function()
+        {
+            // --------------Chart 1 ----------------------------
+            chartTemperatue = new Highcharts.Chart({
+                chart:
+                    {
+                    renderTo: 'data-temperature',
+                    defaultSeriesType: 'area',
+                    events: {
+                        load: requestData
+                            }
+                    },
+                title:
+                    {
+                    text: 'Temperature'
+                    },
+                xAxis: {
+                    type: 'datetime',
+                    tickPixelInterval: 150,
+                    maxZoom: 20 * 1000
+                        },
+                yAxis: {
+                    minPadding: 0.2,
+                    maxPadding: 0.2,
+                    title: {
+                        text: 'Value',
+                        margin: 80
+                            }
+                         },
+                series: [{
+                    color : '#c23d23',
+                    lineColor: '#303030',
+                    name: 'Temperature',
+                    data: []
+                }]
+            });
+            // --------------Chart 1 Ends - -----------------
+
+            chartHumidity = new Highcharts.Chart({
+                chart:
+                    {
+                        renderTo: 'data-humidity',
+                        defaultSeriesType: 'area',
+                        events: {
+                            load: requestData
+                        }
+                    },
+                title:
+                    {
+                        text: 'Humidity'
+                    },
+                xAxis: {
+                    type: 'datetime',
+                    tickPixelInterval: 150,
+                    maxZoom: 20 * 1000
+                },
+                yAxis: {
+                    minPadding: 0.2,
+                    maxPadding: 0.2,
+                    title: {
+                        text: 'Value',
+                        margin: 80
+                    }
+                },
+                series: [{
+                    lineColor: '#303030',
+                    color: '#1d82b8',
+                    name: 'Humidity',
+                    data: []
+                }]
+            });
+
+            //Air quality chart
+            chartAirquality = new Highcharts.Chart({
+                chart:
+                    {
+                        renderTo: 'data-airquality',
+                        defaultSeriesType: 'area',
+                        events: {
+                            load: requestData
+                        }
+                    },
+                title:
+                    {
+                        text: 'Air Quality'
+                    },
+                xAxis: {
+                    type: 'datetime',
+                    tickPixelInterval: 150,
+                    maxZoom: 20 * 1000
+                },
+                yAxis: {
+                    minPadding: 0.2,
+                    maxPadding: 0.2,
+                    title: {
+                        text: 'Value',
+                        margin: 80
+                    }
+                },
+                series: [{
+                    lineColor: '#303030',
+                    color: '#ADFF2F',
+                    name: 'Air Quality',
+                    data: []
+                }]
+            });
+
+        });
+    </script>
+</body>
+
+
+</html>
